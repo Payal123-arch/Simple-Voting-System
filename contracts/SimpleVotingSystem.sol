@@ -8,7 +8,7 @@ pragma solidity ^0.8.9;
 contract SimpleVoting {
     struct Proposal 
         string description;
-        uint256 yesVotes;
+        
         uint256 noVotes;
         uint256 endTime;
         bool executed;
