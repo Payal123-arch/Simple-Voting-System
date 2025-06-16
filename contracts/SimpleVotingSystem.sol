@@ -505,11 +505,7 @@ contract SimpleVoting {
     }
 
     function unpause() public onlyOwner {
-        paused = false;
-        emit Unpaused();
-    }
-
-    // ========== Internal Delegation Logic ==========
+        paused = false
 
     function _getActualVoter(address _voter) internal view returns (address) {
         address current = _voter;
