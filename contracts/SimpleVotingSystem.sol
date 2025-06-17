@@ -10,10 +10,6 @@ contract SimpleVoting {
         string descripti
     }
 
-    address public owner;
-    uint256 public proposalCount;
-    bool public paused;
-
     // Voting weights per address (default 1)
     mapping(address => uint256) public votingWeights;
 
