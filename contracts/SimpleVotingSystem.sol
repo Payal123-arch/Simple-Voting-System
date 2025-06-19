@@ -11,10 +11,7 @@ contract SimpleVoting {
     }
 
     // Voting weights per address (default 1)
-    mapping(address => uint256) public votingWeights;
-
-    // Delegation mapping: voter => delegate
-    mapping(address => address) delegation;
+    mapping(address => uint256) public votingWeight
 
     // Minimum votes required for quorum (yes + no)
     uint256 public quorum;
