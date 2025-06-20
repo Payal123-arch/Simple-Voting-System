@@ -47,10 +47,6 @@ contract SimpleVoting {
     }
 
     // ========== Voting Configuration ==========
-
-    function setVotingWeight(address _voter, uint256 _weight) public onlyOwner {
-        require(_voter != address(0), "Zero address");
-        votingWeights[_voter] = _weight;
     }
 
     function delegateVote(address _delegate) public whenNotPaused {
