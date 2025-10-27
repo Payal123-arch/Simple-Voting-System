@@ -1,4 +1,4 @@
-Simple Voting System
+Simple Voting System project
 Project Description
 A decentralized voting system built on blockchain technology that allows for transparent, secure, and tamper-proof voting. The system enables creating proposals, casting votes, and viewing results in a trustless manner.
 Project Vision
