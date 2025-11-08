@@ -1,17 +1,4 @@
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
-
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-
-/**
- * @title SimpleVotingSystem
- * @dev Basic governance voting system based on ERC20 token holdings
- */
-contract SimpleVotingSystem is Ownable {
-    IERC20 public votingToken;
-    uint256 public proposalCount;
-    uint256 public votingPeriod;  // in blocks
+in blocks
 
     struct Proposal {
         uint256 id;
@@ -26,14 +13,7 @@ contract SimpleVotingSystem is Ownable {
 
     mapping(uint256 => Proposal) public proposals;
 
-    // Events
-    event ProposalCreated(uint256 proposalId, address proposer, string description, uint256 deadline);
-    event Voted(uint256 proposalId, address voter, bool support, uint256 weight);
-    event ProposalFinalized(uint256 proposalId, bool passed);
-
-    constructor(IERC20 _votingToken, uint256 _votingPeriod) {
-        votingToken = _votingToken;
-        votingPeriod = _votingPeriod;  // e.g., 100 blocks
+    e.g., 100 blocks
         proposalCount = 0;
     }
 
@@ -63,8 +43,7 @@ contract SimpleVotingSystem is Ownable {
 
         bool passed = (p.votesFor > p.votesAgainst);
 
-        // Here, add the logic to execute the proposal's decision
-        // For example, change protocol parameters, upgrade a contract, etc.
+        For example, change protocol parameters, upgrade a contract, etc.
 
         p.executed = true;
         emit ProposalFinalized(proposalId, passed);
@@ -99,3 +78,6 @@ contract SimpleVotingSystem is Ownable {
         return (p.votesFor, p.votesAgainst);
     }
 }
+// 
+End
+// 
