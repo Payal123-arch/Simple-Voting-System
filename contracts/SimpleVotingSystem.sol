@@ -1,83 +1,103 @@
-in blocks
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
 
-    struct Proposal {
-        uint256 id;
-        address proposer;
-        string description;
-        uint256 votesFor;
-        uint256 votesAgainst;
-        uint256 deadline;
-        bool executed;
-        mapping(address => bool) hasVoted;
+/**
+ * @title SimpleVotingSystem
+ * @dev Basic single-poll voting contract with one vote per address
+ * @notice Deployer defines options; users vote once; contract tracks tallies and winning option
+ */
+contract SimpleVotingSystem {
+    address public owner;
+
+    struct Option {
+        string name;
+        uint256 voteCount;
     }
 
-    mapping(uint256 => Proposal) public proposals;
+    Option[] public options;
 
-    e.g., 100 blocks
-        proposalCount = 0;
+    // voter => hasVoted
+    mapping(address => bool) public hasVoted;
+    // voter => option index
+    mapping(address => uint256) public voteOf;
+
+    event OptionAdded(uint256 indexed index, string name);
+    event Voted(address indexed voter, uint256 indexed optionIndex);
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only owner");
+        _;
     }
 
-    /**
-     * @dev Creates a new proposal.
-     */
-    function createProposal(string calldata description) external returns (uint256) {
-        proposalCount++;
-        Proposal storage p = proposals[proposalCount];
-        p.id = proposalCount;
-        p.proposer = msg.sender;
-        p.description = description;
-        p.deadline = block.number + votingPeriod;
-        p.executed = false;
-
-        emit ProposalCreated(proposalCount, msg.sender, description, p.deadline);
-        return proposalCount;
-    }
-
-    /**
-     * @dev Execute a proposal after the deadline, if passed.
-     */
-    function executeProposal(uint256 proposalId) external {
-        Proposal storage p = proposals[proposalId];
-        require(block.number > p.deadline, "Voting still active");
-        require(!p.executed, "Already executed");
-
-        bool passed = (p.votesFor > p.votesAgainst);
-
-        For example, change protocol parameters, upgrade a contract, etc.
-
-        p.executed = true;
-        emit ProposalFinalized(proposalId, passed);
-    }
-
-    /**
-     * @dev Vote support or against a proposal.
-     */
-    function vote(uint256 proposalId, bool support) external {
-        Proposal storage p = proposals[proposalId];
-
-        require(block.number <= p.deadline, "Voting period over");
-        require(!p.hasVoted[msg.sender], "Already voted");
-        uint256 weight = votingToken.balanceOf(msg.sender);
-        require(weight > 0, "No voting power");
-
-        p.hasVoted[msg.sender] = true;
-        if (support) {
-            p.votesFor += weight;
-        } else {
-            p.votesAgainst += weight;
+    constructor(string[] memory optionNames) {
+        owner = msg.sender;
+        for (uint256 i = 0; i < optionNames.length; i++) {
+            options.push(Option({name: optionNames[i], voteCount: 0}));
+            emit OptionAdded(i, optionNames[i]);
         }
-
-        emit Voted(proposalId, msg.sender, support, weight);
     }
 
     /**
-     * @dev Get voting results: supports, against, and total votes.
+     * @dev Add a new option (owner only) before voting or even during voting
      */
-    function getProposalResults(uint256 proposalId) external view returns (uint256 votesFor, uint256 votesAgainst) {
-        Proposal storage p = proposals[proposalId];
-        return (p.votesFor, p.votesAgainst);
+    function addOption(string calldata name) external onlyOwner {
+        options.push(Option({name: name, voteCount: 0}));
+        emit OptionAdded(options.length - 1, name);
+    }
+
+    /**
+     * @dev Cast a vote for an option index
+     * @param optionIndex Index in options array
+     */
+    function vote(uint256 optionIndex) external {
+        require(!hasVoted[msg.sender], "Already voted");
+        require(optionIndex < options.length, "Invalid option");
+
+        hasVoted[msg.sender] = true;
+        voteOf[msg.sender] = optionIndex;
+
+        options[optionIndex].voteCount += 1;
+
+        emit Voted(msg.sender, optionIndex);
+    }
+
+    /**
+     * @dev Get number of options
+     */
+    function getOptionsCount() external view returns (uint256) {
+        return options.length;
+    }
+
+    /**
+     * @dev Compute current winning option index and its vote count
+     */
+    function winningOption() public view returns (uint256 winningIndex, uint256 winningVotes) {
+        uint256 count = options.length;
+        for (uint256 i = 0; i < count; i++) {
+            if (options[i].voteCount > winningVotes) {
+                winningVotes = options[i].voteCount;
+                winningIndex = i;
+            }
+        }
+    }
+
+    /**
+     * @dev Get name of winning option
+     */
+    function winnerName() external view returns (string memory) {
+        (uint256 idx, ) = winningOption();
+        if (options.length == 0) return "";
+        return options[idx].name;
+    }
+
+    /**
+     * @dev Transfer contract ownership
+     */
+    function transferOwnership(address newOwner) external onlyOwner {
+        require(newOwner != address(0), "Zero address");
+        address prev = owner;
+        owner = newOwner;
+        emit OwnershipTransferred(prev, newOwner);
     }
 }
-// 
-End
-// 
